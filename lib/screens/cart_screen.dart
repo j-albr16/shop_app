@@ -43,7 +43,8 @@ class CartScreen extends StatelessWidget {
                   ),
                   FlatButton(
                     onPressed: () {
-                      Provider.of<Order>(context).addOrder(cart.item.values.toList(), cart.totalAmount,);
+                      Provider.of<Order>(context, listen: false).addOrder(cart.item.values.toList(), cart.totalAmount,);
+                      cart.clear();
                     },
                     child: Text('ORDER NOW'),
                     textColor: Theme.of(context).primaryColor,

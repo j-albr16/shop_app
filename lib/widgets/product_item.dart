@@ -37,17 +37,16 @@ class ProductItem extends StatelessWidget {
           ),
         ),
         footer: GridTileBar(
-          leading: Consumer<Product>( //can make a specific part a listener
-            builder: (context, product, child) =>
-                IconButton(
-                  icon: Icon(
-                    product.isFavourite ? Icons.favorite : Icons
-                        .favorite_border,
-                  ),
-                  onPressed: () {
-                    product.toggleFavouriteStatus();
-                  },
-                ),
+          leading: Consumer<Product>(
+            //can make a specific part a listener
+            builder: (context, product, child) => IconButton(
+              icon: Icon(
+                product.isFavourite ? Icons.favorite : Icons.favorite_border,
+              ),
+              onPressed: () {
+                product.toggleFavouriteStatus();
+              },
+            ),
             //child: Text('Never CHANGES'), the child in Consumer doesnt rebuild
           ),
           backgroundColor: Colors.black45,
@@ -59,6 +58,29 @@ class ProductItem extends StatelessWidget {
             icon: Icon(Icons.shopping_cart),
             onPressed: () {
               cart.addItem(product.id, product.price, product.title);
+              Scaffold.of(context).hideCurrentSnackBar();
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Added item to Card'),
+                  duration: Duration(
+                    seconds: 2,
+                  ),
+                  action: SnackBarAction(
+                    label: 'Undo',
+                    onPressed: () {
+                      cart.removeSingeItem(product.id);
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Item was removed from shopping List',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              );
             },
           ),
         ),
