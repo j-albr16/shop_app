@@ -7,6 +7,7 @@ import '../widgets/products_grid.dart';
 import '../providers/products.dart';
 import '../widgets/badge.dart';
 import '../widgets/app_drawer.dart';
+import '../providers/cart.dart';
 
 enum FilterOptions {
   Favorites,
@@ -25,14 +26,17 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
 
   @override
   void didChangeDependencies() {
-    if (!_isInit){
+    if (!_isInit) {
       setState(() {
         _isLoading = true;
         Provider.of<Products>(context).fetchAndSetProducts().then((_) {
-          _isLoading = false;
-          _isInit = true;
+          Provider.of<Cart>(context).fetchAndSetProducts().then((_) {
+            _isLoading = false;
+            _isInit = true;
+          });
         });
-      });}
+      });
+    }
 
     super.didChangeDependencies();
   }
