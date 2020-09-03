@@ -15,6 +15,7 @@ enum FilterOptions {
 }
 
 class ProductsOverviewScreen extends StatefulWidget {
+  static const routeName = '/products-overview';
   @override
   _ProductsOverviewScreenState createState() => _ProductsOverviewScreenState();
 }
@@ -24,22 +25,41 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _isInit = false;
   var _isLoading = false;
 
+
   @override
-  void didChangeDependencies() {
-    if (!_isInit) {
-      setState(() {
-        _isLoading = true;
-        Provider.of<Products>(context).fetchAndSetProducts().then((_) {
-          Provider.of<Cart>(context).fetchAndSetProducts().then((_) {
-            _isLoading = false;
-            _isInit = true;
-          });
+  void initState() {
+    setState(() {
+      _isLoading = true;
+    });
+    Future.delayed(Duration.zero).then((value) {
+      return Provider.of<Cart>(context, listen: false).fetchAndSetProducts();
+    });
+    Future.delayed(Duration.zero).then((value){
+      return Provider.of<Products>(context, listen: false).fetchAndSetProducts().then((value) {
+        setState(() {
+          _isLoading = false;
         });
       });
-    }
+    });
 
-    super.didChangeDependencies();
+    super.initState();
   }
+
+//  @override
+//  void didChangeDependencies() {
+//    if (!_isInit) {
+//      setState(() {
+//        _isLoading = true;
+//        Provider.of<Products>(context, listen: false).fetchAndSetProducts().then((_) {
+//          setState(() {
+//            _isLoading = false;
+//            _isInit = true;
+//          });
+//          });
+//        });
+//      }
+//    super.didChangeDependencies();
+//    }
 
   @override
   Widget build(BuildContext context) {

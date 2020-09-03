@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/providers/auth.dart';
 import 'package:shop_app/providers/cart.dart';
 
 import '../screens/product_detail_screen.dart';
 import '../providers/product.dart';
 import '../providers/cart.dart';
 
-class ProductItem extends StatelessWidget {
+class ProductItem extends StatefulWidget {
 //  final String id;
 //  final String title;
 //  final String imageUrl;
@@ -18,9 +19,18 @@ class ProductItem extends StatelessWidget {
 //  });
 
   @override
+  _ProductItemState createState() => _ProductItemState();
+}
+
+class _ProductItemState extends State<ProductItem> {
+  var _isLoading = false;
+
+  @override
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
+    final authData = Provider.of<Auth>(context, listen: false);
+    // _isLoading ? Center(child: CircularProgressIndicator(),) :
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: GridTile(
@@ -44,7 +54,7 @@ class ProductItem extends StatelessWidget {
                 product.isFavourite ? Icons.favorite : Icons.favorite_border,
               ),
               onPressed: () {
-                product.toggleFavouriteStatus();
+                product.toggleFavouriteStatus(authData.token, authData.userId);
               },
             ),
             //child: Text('Never CHANGES'), the child in Consumer doesnt rebuild
@@ -56,8 +66,17 @@ class ProductItem extends StatelessWidget {
           ),
           trailing: IconButton(
             icon: Icon(Icons.shopping_cart),
-            onPressed: () {
-              cart.addItem(product.id, product.price, product.title);
+            onPressed: _isLoading ? null : () async {
+              setState(() {
+                _isLoading = true;
+              });
+              try {
+                    await cart.addItem(product.id, product.price, product.title);
+              } finally {
+                setState(() {
+                  _isLoading = false;
+                });
+              }
               Scaffold.of(context).hideCurrentSnackBar();
               Scaffold.of(context).showSnackBar(
                 SnackBar(

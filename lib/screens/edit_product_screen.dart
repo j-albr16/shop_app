@@ -20,7 +20,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _imageUrlFocusNode = FocusNode();
   final _imageUrlController = TextEditingController();
   final _form = GlobalKey<FormState>();
-  var uuid = Uuid();
   var _editedProduct = Product(
     id: null,
     title: '',

@@ -21,6 +21,13 @@ class CartItem {
 
 class Cart with ChangeNotifier {
   Map<String, CartItem> _items = {};
+  final String authToken;
+  final userId;
+
+
+  Cart(this.authToken, this._items, this.userId);
+
+
 
   Map<String, CartItem> get item {
     return {..._items};
@@ -40,11 +47,14 @@ class Cart with ChangeNotifier {
 
 
   Future<void> fetchAndSetProducts() async {
-    final url = 'https://shop-app-79b44.firebaseio.com/cart.json';
+    final url = 'https://shop-app-79b44.firebaseio.com/cart/$userId.json?auth=$authToken';
     try{
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       final Map<String, CartItem> loadedData = {};
+      if(extractedData == null){
+        return;
+      }
       extractedData.forEach((productId, prodData) {
         loadedData .putIfAbsent(
           productId, () {
@@ -67,14 +77,14 @@ class Cart with ChangeNotifier {
 
   Future<void> addItem(String productId, double price, String title) async{
     if (_items.containsKey(productId)) {
-      final url = 'https://shop-app-79b44.firebaseio.com/cart/$productId.json';
+      final url = 'https://shop-app-79b44.firebaseio.com/cart/$userId/$productId.json?auth=$authToken';
       try{
         final response = await http.patch(url, body: json.encode({
           'title': _items[productId].title,
           'price': _items[productId].price,
           'quantity': _items[productId].quantitiy + 1,
         }));
-        _items.update(
+         _items.update(
             productId,
                 (existingCartItem) => CartItem(
               id: json.decode(response.body)['name'],
@@ -82,12 +92,16 @@ class Cart with ChangeNotifier {
               price: existingCartItem.price,
               quantitiy: existingCartItem.quantitiy + 1,
             ));
+       // print(_items);
             } catch (error){
         print(error);
         throw error;
+      }finally{
+        notifyListeners();
+        print(_items);
       }
-    } else {
-      const url = 'https://shop-app-79b44.firebaseio.com/cart.json';
+    } else{
+      final url = 'https://shop-app-79b44.firebaseio.com/cart/$userId/$productId.json?auth=$authToken';
       try{
         final response = await http.post(url,
         body: json.encode({
@@ -103,16 +117,18 @@ class Cart with ChangeNotifier {
               price: price,
               quantitiy: 1,
             ));
+        print(_items);
       }catch (error){
         print(error);
         throw error;
+      }finally{
+        notifyListeners();
       }
     }
-    notifyListeners();
   }
 
   Future<void> removeItem(String productId) async{
-    final url = 'https://shop-app-79b44.firebaseio.com/cart/$productId.json';
+    final url = 'https://shop-app-79b44.firebaseio.com/cart/$userId/$productId.json?auth=$authToken';
     var loadedItem = _items[productId];
     _items.remove(productId);
     notifyListeners();
@@ -127,8 +143,20 @@ class Cart with ChangeNotifier {
     loadedItem = null;
   }
 
-  void clear() {
+  Future<void> clear() async{
+    final url = 'https://shop-app-79b44.firebaseio.com/cart/$userId.json?auth=$authToken';
+    final loadedItems = _items;
     _items = {};
+    try{
+      final response = await http.delete(url);
+      if (response.statusCode >= 400 )
+        _items = loadedItems;
+      print('deleting didnt work');
+    }catch (error){
+      print(error);
+      throw error;
+      notifyListeners();
+    }
     notifyListeners();
   }
 
@@ -137,7 +165,7 @@ class Cart with ChangeNotifier {
       return;
     }
     if (_items[productId].quantitiy > 1) {
-      final url = 'https://shop-app-79b44.firebaseio.com/cart/$productId.json';
+      final url = 'https://shop-app-79b44.firebaseio.com/cart/$userId/$productId.json?auth=$authToken';
       try{
         final response = await http.patch(url, body: json.encode({
           'title': _items[productId].title,
