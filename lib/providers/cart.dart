@@ -36,31 +36,48 @@ class Cart with ChangeNotifier {
   int get itemCount {
     return _items.length;
   }
-
   double get totalAmount {
     var total = 0.0;
     _items.forEach((key, cartItem) {
-      total += cartItem.price * cartItem.quantitiy;
+      if(cartItem.price != null && cartItem.quantitiy != null){
+        total += cartItem.price * cartItem.quantitiy;
+      }
     });
     return total;
   }
+//  double get totalAmount {
+//    var total = 0.0;
+//      _items.forEach((key, cartItem) {
+//
+//        total += cartItem.price * cartItem.quantitiy;
+//      });
+//    return total;
+//  }
 
 
   Future<void> fetchAndSetProducts() async {
+    print('start fetching Data of Carts');
     final url = 'https://shop-app-79b44.firebaseio.com/cart/$userId.json?auth=$authToken';
     try{
       final response = await http.get(url);
+      print('fetching Data of Carts');
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       final Map<String, CartItem> loadedData = {};
       if(extractedData == null){
+        print('couldnt load Data - No Data available');
         return;
       }
       extractedData.forEach((productId, prodData) {
         loadedData .putIfAbsent(
           productId, () {
+            print(productId);
+            print(prodData['price']);
+            print(prodData['title']);
+            print(prodData['quantity']);
+
           return CartItem(
             id: productId,
-            price: prodData['price'],
+           price: prodData['price'],
             title: prodData['title'],
             quantitiy: prodData['quantity'],
           );
@@ -69,6 +86,7 @@ class Cart with ChangeNotifier {
       });
       _items = loadedData;
       notifyListeners();
+      print(_items);
     } catch (error){
       print(error);
       throw error;
@@ -122,6 +140,7 @@ class Cart with ChangeNotifier {
         print(error);
         throw error;
       }finally{
+        print('finished loading Carts');
         notifyListeners();
       }
     }
@@ -155,7 +174,6 @@ class Cart with ChangeNotifier {
     }catch (error){
       print(error);
       throw error;
-      notifyListeners();
     }
     notifyListeners();
   }

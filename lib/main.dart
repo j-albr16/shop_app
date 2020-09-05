@@ -59,7 +59,6 @@ class MyApp extends StatelessWidget {
                 accentColor: Colors.blueGrey,
                 accentColorBrightness: Brightness.light,
               ),
-              initialRoute: '/',
               routes: {
                 ProductsOverviewScreen.routeName: (ctx) =>
                     ProductsOverviewScreen(),

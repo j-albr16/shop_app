@@ -82,12 +82,12 @@ class CartItem extends StatelessWidget {
           child: ListTile(
             leading: CircleAvatar(
               child: FittedBox(
-                child: Text('${price}' + '€'),
+                child: Text(price.toStringAsFixed(0) + '€'),
               ),
             ),
-            title: Text(title),
-            subtitle: Text('Total: ${price * quantity} €'),
-            trailing: Text('${quantity} x'),
+            title: Text(title.toString()),
+            subtitle: price == null || quantity == null ? Text('NULL') :  Text('Total: ${price * quantity} €'),
+            trailing: Text('$quantity x'),
           ),
         ),
       ),

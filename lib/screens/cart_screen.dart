@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../widgets/order_button.dart';
 import '../providers/cart.dart' show Cart;
 import '../widgets/cart_item.dart';
+import '../debug_print .dart';
 
 
 class CartScreen extends StatefulWidget {
@@ -61,12 +62,15 @@ class _CartScreenState extends State<CartScreen> {
             child: ListView.builder(
               itemCount: cart.itemCount,
               itemBuilder: (context, index) {
-                return CartItem(
-                  productId: cart.item.keys.toList()[index],
-                  id: cart.item.values.toList()[index].id,
-                  title: cart.item.values.toList()[index].title,
-                  price: cart.item.values.toList()[index].price,
-                  quantity: cart.item.values.toList()[index].quantitiy,
+                return DebugPrinter(
+                  debugString: cart.item.values.toList()[index].title,
+                  child: CartItem(
+                    productId: cart.item.keys.toList()[index],
+                    id: cart.item.values.toList()[index].id,
+                    title: cart.item.values.toList()[index].title,
+                    price: cart.item.values.toList()[index].price,
+                    quantity: cart.item.values.toList()[index].quantitiy,
+                  ),
                 );
               },
             ),

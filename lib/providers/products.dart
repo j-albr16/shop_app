@@ -22,36 +22,64 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
-    final filterString = filterByUser ? 'orderBy="userId"&equalTo="$userId"' : '';
+    print('Start Fetching Products');
+    final filterString =
+        filterByUser ? 'orderBy="userId"&equalTo="$userId"' : '';
     var url =
         'https://shop-app-79b44.firebaseio.com/products.json?auth=$authToken&$filterString';
     try {
       final response = await http.get(url);
+      print('Fetching Products');
       final extractedData =
           await json.decode(response.body) as Map<String, dynamic>;
       final List<Product> loadedProducts = [];
       if (extractedData == null) {
+        print('couldnt load Data - No Data available');
         return;
+      }
+      if (extractedData ['error'] != null) {
+        print('Ithrew');
+        throw HttpException(extractedData ['error']['message']);
       }
       url =
           'https://shop-app-79b44.firebaseio.com/userFavourites/$userId.json?auth=$authToken';
       final favouriteResponse = await http.get(url);
-      final favouriteData = json.decode(favouriteResponse.body);
-      extractedData.forEach((prodId, prodData) {
-        loadedProducts.add(
-          Product(
+      final favouriteData =
+          json.decode(favouriteResponse.body);
+      if (favouriteData['error'] != null) {
+        print('Ithrew');
+        throw HttpException(favouriteData['error']['message']);
+      }
+      extractedData.forEach(
+        (prodId, prodData) {
+//          print(prodId);
+//          print(prodData['price']);
+//          print(prodData['imageUrl']);
+//          print(prodData['title']);
+          print(favouriteData);
+          loadedProducts.add(
+              Product(
             id: prodId,
-            title: prodData['title'],
+            title: (prodData['title']),
             description: prodData['description'],
-            price: prodData['price'],
+            price: prodData['price'].toDouble(),
             imageUrl: prodData['imageUrl'],
-            isFavourite: favouriteData == null ? false : favouriteData[prodId],
-          ),
-        );
-      });
+            isFavourite:
+                favouriteData == null ? false : favouriteData[prodId] ?? false,
+          ));
+//          print(prodId);
+//          print(prodData['price']);
+//          print(prodData['imageUrl']);
+//          print(prodData['title']);
+        },
+      );
       _items = loadedProducts;
       notifyListeners();
-    } catch (error) {
+      print('finished loading Products');
+//      print(_items);
+
+    }
+    catch (error) {
       throw error;
     }
   }
